@@ -1,0 +1,40 @@
+{% extends 'common/base.html' %}
+
+{% block title %}Mahsulotlar — NovaShop{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+    <div class="container">
+        <span class="eyebrow">Katalog</span>
+        <h1>Siz uchun tanlangan<br>mahsulotlar</h1>
+        <p>Eng so'nggi va sifatli mahsulotlarni qulay narxlarda toping.</p>
+    </div>
+</section>
+
+<section class="catalog-section">
+    <div class="container">
+        <form class="filter-bar" method="get">
+            <label class="search-field">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                <input type="search" name="q" value="{{ query }}" placeholder="Mahsulot nomini qidiring...">
+            </label>
+            <label class="select-field">
+                <select name="category">
+                    <option value="">Barcha kategoriyalar</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button class="button button-primary" type="submit">Qidirish</button>
+        </form>
+
+        <div class="catalog-meta">
+            <span><strong>{{ products|length }}</strong> ta mahsulot topildi</span>
+            {% if query or selected_category %}<a href="{% url 'product_list' %}">Filtrlarni tozalash ×</a>{% endif %}
+        </div>
+
+        {% include 'products/_product_grid.html' %}
+    </div>
+</section>
+{% endblock %}

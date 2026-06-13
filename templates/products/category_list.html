@@ -1,0 +1,35 @@
+{% extends 'common/base.html' %}
+
+{% block title %}Kategoriyalar — NovaShop{% endblock %}
+
+{% block content %}
+<section class="page-hero compact">
+    <div class="container">
+        <span class="eyebrow">Kolleksiyalar</span>
+        <h1>Mahsulot kategoriyalari</h1>
+        <p>Kerakli bo'limni tanlang va mos mahsulotlarni ko'ring.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="category-grid category-page-grid">
+            {% for category in categories %}
+                <a class="category-card{% if category.image %} has-image{% endif %}" href="{% url 'category_detail' category.id %}"{% if category.image %} style="background-image: linear-gradient(rgba(19,39,30,.62), rgba(19,39,30,.90)), url('{{ category.image.url }}');"{% endif %}>
+                    <span class="category-number">{{ category.products.count }} ta mahsulot</span>
+                    <div>
+                        <h3>{{ category.name }}</h3>
+                        <p>{{ category.description|default:"Ushbu kategoriyadagi barcha mahsulotlarni ko'ring."|truncatechars:80 }}</p>
+                    </div>
+                    <span class="circle-arrow">↗</span>
+                </a>
+            {% empty %}
+                <div class="empty-state">
+                    <h3>Kategoriyalar topilmadi</h3>
+                    <p>Admin panel orqali yangi kategoriya qo'shing.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

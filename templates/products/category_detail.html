@@ -1,0 +1,24 @@
+{% extends 'common/base.html' %}
+
+{% block title %}{{ category.name }} — NovaShop{% endblock %}
+
+{% block content %}
+<section class="category-detail-hero"{% if category.image %} style="background-image: linear-gradient(rgba(19,39,30,.65), rgba(19,39,30,.88)), url('{{ category.image.url }}');"{% endif %}>
+    <div class="container">
+        <a class="back-link" href="{% url 'category_list' %}">← Kategoriyalarga qaytish</a>
+        <span class="eyebrow">Kategoriya</span>
+        <h1>{{ category.name }}</h1>
+        <p>{{ category.description|default:"Ushbu kategoriyadagi eng sara mahsulotlar." }}</p>
+    </div>
+</section>
+
+<section class="catalog-section">
+    <div class="container">
+        <div class="catalog-meta">
+            <span><strong>{{ products|length }}</strong> ta mahsulot</span>
+            <a href="{% url 'product_list' %}">Barcha mahsulotlar →</a>
+        </div>
+        {% include 'products/_product_grid.html' %}
+    </div>
+</section>
+{% endblock %}

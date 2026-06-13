@@ -1,0 +1,38 @@
+<div class="product-grid">
+    {% for product in products %}
+        <article class="product-card">
+            <div class="product-image">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+                {% else %}
+                    <div class="image-placeholder">
+                        <span>{{ product.name|slice:":1"|upper }}</span>
+                    </div>
+                {% endif %}
+                <span class="product-category">{{ product.category.name }}</span>
+                {% if product.is_in_stock %}
+                    <span class="stock-dot" title="Omborda mavjud"></span>
+                {% endif %}
+            </div>
+            <div class="product-info">
+                <div>
+                    <h3>{{ product.name }}</h3>
+                    <p>{{ product.description|default:"Sifatli va ishonchli mahsulot"|truncatechars:70 }}</p>
+                </div>
+                <div class="product-bottom">
+                    <div class="price"><strong>{{ product.price|floatformat:0 }}</strong><span>so'm</span></div>
+                    <button class="add-button" type="button" {% if not product.is_in_stock %}disabled{% endif %} aria-label="{{ product.name }}ni savatga qo'shish">
+                        {% if product.is_in_stock %}+{% else %}×{% endif %}
+                    </button>
+                </div>
+            </div>
+        </article>
+    {% empty %}
+        <div class="empty-state">
+            <span>⌕</span>
+            <h3>Mahsulot topilmadi</h3>
+            <p>Qidiruv yoki kategoriya filtrini o'zgartirib ko'ring.</p>
+            <a class="button button-primary" href="{% url 'product_list' %}">Filtrlarni tozalash</a>
+        </div>
+    {% endfor %}
+</div>

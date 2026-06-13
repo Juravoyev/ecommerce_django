@@ -1,12 +1,91 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Home - E-commerce</title>
-    </head>
-    <body>
-        <h1>Welcome to our E-commerce Store!</h1>
-        <p>Explore our wide range of products and enjoy shopping with us.</p>
-    </body>
-</html>
+{% extends 'common/base.html' %}
+
+{% block title %}NovaShop — Zamonaviy onlayn do'kon{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-copy">
+            <span class="eyebrow">Yangi avlod onlayn do'koni</span>
+            <h1>Kerakli narsalar.<br><span>Yaxshiroq narxda.</span></h1>
+            <p>Texnika va kundalik mahsulotlarni oson toping. Ishonchli sifat, tez yetkazib berish va qulay xarid bir joyda.</p>
+            <div class="hero-actions">
+                <a class="button button-primary" href="{% url 'product_list' %}">
+                    Xaridni boshlash
+                    <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+                <a class="text-link" href="#categories">Kategoriyalarni ko'rish</a>
+            </div>
+            <div class="hero-stats">
+                <div><strong>500+</strong><span>Mahsulot</span></div>
+                <div><strong>24 soat</strong><span>Tez yetkazish</span></div>
+                <div><strong>100%</strong><span>Sifat kafolati</span></div>
+            </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+            <div class="glow"></div>
+            <div class="product-stage">
+                <span class="stage-label">YANGI</span>
+                <div class="headphone">
+                    <div class="head-band"></div>
+                    <div class="ear ear-left"></div>
+                    <div class="ear ear-right"></div>
+                </div>
+                <div class="stage-copy">
+                    <span>Premium ovoz</span>
+                    <strong>Har bir detalni his eting</strong>
+                </div>
+            </div>
+            <div class="floating-card floating-card-top">
+                <span class="mini-icon">✓</span>
+                <div><strong>Kafolatlangan</strong><small>Original mahsulot</small></div>
+            </div>
+            <div class="floating-card floating-card-bottom">
+                <span class="mini-icon truck">→</span>
+                <div><strong>Tez yetkazish</strong><small>Butun O'zbekiston bo'ylab</small></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" id="categories">
+    <div class="container">
+        <div class="section-heading">
+            <div><span class="eyebrow">Kolleksiyalar</span><h2>Kategoriyalar bo'yicha</h2></div>
+            <a class="text-link" href="{% url 'category_list' %}">Barchasini ko'rish →</a>
+        </div>
+        <div class="category-grid">
+            {% for category in categories %}
+                <a class="category-card{% if category.image %} has-image{% endif %}" href="{% url 'category_detail' category.id %}"{% if category.image %} style="background-image: linear-gradient(rgba(19,39,30,.70), rgba(19,39,30,.88)), url('{{ category.image.url }}');"{% endif %}>
+                    <span class="category-number">0{{ forloop.counter }}</span>
+                    <div>
+                        <h3>{{ category.name }}</h3>
+                        <p>{{ category.description|default:"Eng sara mahsulotlar"|truncatechars:55 }}</p>
+                    </div>
+                    <span class="circle-arrow">↗</span>
+                </a>
+            {% empty %}
+                <div class="empty-inline">Kategoriyalar tez orada qo'shiladi.</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section featured-section">
+    <div class="container">
+        <div class="section-heading">
+            <div><span class="eyebrow">Yangi kelganlar</span><h2>Tanlangan mahsulotlar</h2></div>
+            <a class="text-link" href="{% url 'product_list' %}">Barcha mahsulotlar →</a>
+        </div>
+        {% include 'products/_product_grid.html' %}
+    </div>
+</section>
+
+<section class="benefits">
+    <div class="container benefits-grid">
+        <div class="benefit"><span>01</span><div><h3>Tez yetkazib berish</h3><p>Buyurtmangizni qisqa muddatda yetkazamiz.</p></div></div>
+        <div class="benefit"><span>02</span><div><h3>Xavfsiz to'lov</h3><p>Ma'lumotlaringiz ishonchli himoyalangan.</p></div></div>
+        <div class="benefit"><span>03</span><div><h3>Doimiy yordam</h3><p>Savollaringizga har doim javob beramiz.</p></div></div>
+    </div>
+</section>
+{% endblock %}

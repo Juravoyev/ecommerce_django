@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Zamonaviy va ishonchli onlayn do'kon">
+    <title>{% block title %}NovaShop{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/store.css' %}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container nav-wrap">
+            <a class="brand" href="{% url 'home' %}" aria-label="NovaShop bosh sahifa">
+                <span class="brand-mark">N</span>
+                <span>NovaShop</span>
+            </a>
+
+            <button class="nav-toggle" type="button" aria-label="Menyuni ochish" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+
+            <nav class="main-nav" aria-label="Asosiy menyu">
+                <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Bosh sahifa</a>
+                <a href="{% url 'category_list' %}" class="{% if request.resolver_match.url_name == 'category_list' or request.resolver_match.url_name == 'category_detail' %}active{% endif %}">Kategoriyalar</a>
+                <a href="{% url 'product_list' %}" class="{% if request.resolver_match.url_name == 'product_list' %}active{% endif %}">Mahsulotlar</a>
+                <a href="{% url 'order_list' %}" class="{% if request.resolver_match.url_name == 'order_list' %}active{% endif %}">Buyurtmalar</a>
+            </nav>
+
+            <div class="nav-actions">
+                {% if request.user.is_authenticated %}
+                    <span class="user-chip">{{ request.user.username|slice:":1"|upper }}</span>
+                {% else %}
+                    <a class="icon-button" href="/admin/login/?next=/" aria-label="Kirish">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"/></svg>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div>
+                <a class="brand footer-brand" href="{% url 'home' %}">
+                    <span class="brand-mark">N</span><span>NovaShop</span>
+                </a>
+                <p>Sifatli mahsulotlar, qulay narxlar va tezkor yetkazib berish.</p>
+            </div>
+            <div>
+                <h3>Do'kon</h3>
+                <a href="{% url 'product_list' %}">Mahsulotlar</a>
+                <a href="{% url 'category_list' %}">Kategoriyalar</a>
+                <a href="{% url 'order_list' %}">Buyurtmalar</a>
+            </div>
+            <div>
+                <h3>Aloqa</h3>
+                <a href="tel:+998901234567">+998 90 123 45 67</a>
+                <a href="mailto:hello@novashop.uz">hello@novashop.uz</a>
+            </div>
+        </div>
+        <div class="container footer-bottom">
+            <span>&copy; 2026 NovaShop</span>
+            <span>Toshkent, O'zbekiston</span>
+        </div>
+    </footer>
+
+    <script>
+        const toggle = document.querySelector('.nav-toggle');
+        const nav = document.querySelector('.main-nav');
+        toggle.addEventListener('click', () => {
+            const open = nav.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', open);
+        });
+    </script>
+</body>
+</html>

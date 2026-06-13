@@ -1,0 +1,63 @@
+{% extends 'common/base.html' %}
+
+{% block title %}Buyurtmalar — NovaShop{% endblock %}
+
+{% block content %}
+<section class="page-hero compact">
+    <div class="container">
+        <span class="eyebrow">Shaxsiy kabinet</span>
+        <h1>Buyurtmalar tarixi</h1>
+        <p>Barcha xaridlaringiz holatini bir joyda kuzating.</p>
+    </div>
+</section>
+
+<section class="orders-section">
+    <div class="container">
+        <div class="orders-list">
+            {% for order in orders %}
+                <article class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <span class="order-label">Buyurtma</span>
+                            <h2>#{{ order.id|stringformat:"05d" }}</h2>
+                        </div>
+                        <span class="status status-{{ order.status }}">{{ order.get_status_display }}</span>
+                        <div class="order-date">
+                            <span>Sana</span>
+                            <strong>{{ order.created_at|date:"d.m.Y" }}</strong>
+                        </div>
+                    </div>
+                    <div class="order-body">
+                        <div class="order-items">
+                            {% for item in order.items.all %}
+                                <div class="order-item">
+                                    <div class="item-thumb">{{ item.product_name|default:item.product.name|slice:":1"|upper }}</div>
+                                    <div class="item-main">
+                                        <strong>{{ item.product_name|default:item.product.name }}</strong>
+                                        <span>{{ item.quantity }} dona × {{ item.unit_price|floatformat:0 }} so'm</span>
+                                    </div>
+                                    <strong class="item-total">{{ item.line_total|floatformat:0 }} so'm</strong>
+                                </div>
+                            {% empty %}
+                                <p class="muted">Buyurtmada mahsulotlar yo'q.</p>
+                            {% endfor %}
+                        </div>
+                        <div class="order-summary">
+                            <div><span>Qabul qiluvchi</span><strong>{{ order.full_name|default:order.user.get_full_name|default:order.user.username }}</strong></div>
+                            <div><span>Yetkazish manzili</span><strong>{{ order.address|truncatechars:45 }}</strong></div>
+                            <div class="grand-total"><span>Jami</span><strong>{{ order.total_price|floatformat:0 }} so'm</strong></div>
+                        </div>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="empty-state orders-empty">
+                    <span>□</span>
+                    <h3>Hozircha buyurtmalar yo'q</h3>
+                    <p>Birinchi xaridingizni boshlash uchun katalogni ko'ring.</p>
+                    <a class="button button-primary" href="{% url 'product_list' %}">Mahsulotlarni ko'rish</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
