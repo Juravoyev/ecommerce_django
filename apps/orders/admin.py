@@ -13,7 +13,7 @@ class OrderItemInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'status', 'total_price', 'created_at')
     list_filter = ('status', 'created_at')
-    search_fields = ('user__username', 'full_name', 'phone')
+    search_fields = ('user__phone_number', 'full_name', 'phone')
     list_select_related = ('user',)
     inlines = (OrderItemInline,)
 

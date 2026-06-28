@@ -9,7 +9,7 @@ from .models import Order, OrderItem
 
 class OrderModelTests(TestCase):
     def test_item_copies_product_data_and_order_calculates_total(self):
-        user = get_user_model().objects.create_user(username='customer')
+        user = get_user_model().objects.create_user(phone_number='+998901234560')
         category = Category.objects.create(name='Laptops')
         product = Product.objects.create(
             category=category,
@@ -29,7 +29,7 @@ class OrderModelTests(TestCase):
         self.assertEqual(order.calculate_total(), Decimal('1500.00'))
 
     def test_order_list_api_returns_orders(self):
-        user = get_user_model().objects.create_user(username='api-customer')
+        user = get_user_model().objects.create_user(phone_number='+998901234561')
         order = Order.objects.create(
             user=user,
             full_name='API Customer',
@@ -46,7 +46,7 @@ class OrderModelTests(TestCase):
         self.assertEqual(response.json()[0]['status'], Order.Status.PENDING)
 
     def test_order_patch_update_works_without_trailing_slash(self):
-        user = get_user_model().objects.create_user(username='patch-customer')
+        user = get_user_model().objects.create_user(phone_number='+998901234562')
         order = Order.objects.create(
             user=user,
             address='Old address',
@@ -63,7 +63,7 @@ class OrderModelTests(TestCase):
         self.assertEqual(order.status, Order.Status.PROCESSING)
 
     def test_order_api_full_crud(self):
-        user = get_user_model().objects.create_user(username='crud-customer')
+        user = get_user_model().objects.create_user(phone_number='+998901234563')
 
         create_response = self.client.post(
             '/api/orders/',
@@ -94,3 +94,44 @@ class OrderModelTests(TestCase):
         delete_response = self.client.delete(f'/api/orders/{order_id}/')
         self.assertEqual(delete_response.status_code, 204)
         self.assertFalse(Order.objects.filter(id=order_id).exists())
+
+    def test_checkout_requires_login(self):
+        response = self.client.get('/orders/checkout/')
+        self.assertEqual(response.status_code, 302)  # Redirects to login
+
+    def test_checkout_post_creates_order_and_updates_stock(self):
+        user = get_user_model().objects.create_user(phone_number='+998901234599', password='password123')
+        self.client.force_login(user)
+
+        category = Category.objects.create(name='Electronics')
+        product = Product.objects.create(
+            category=category,
+            name='Smartphone',
+            price=Decimal('500.00'),
+            stock=10,
+            is_active=True
+        )
+
+        import json
+        cart_data = json.dumps([{'id': product.id, 'qty': 2}])
+
+        response = self.client.post('/orders/checkout/', data={
+            'full_name': 'Test User',
+            'phone': '+998901234599',
+            'address': 'Tashkent, Uzbekistan',
+            'cart_data': cart_data
+        })
+
+        self.assertEqual(response.status_code, 302)  # Redirects to order_list
+        self.assertTrue(Order.objects.filter(user=user, address='Tashkent, Uzbekistan').exists())
+        
+        # Verify stock decremented
+        product.refresh_from_db()
+        self.assertEqual(product.stock, 8)
+
+        # Verify order items
+        order = Order.objects.get(user=user)
+        self.assertEqual(order.items.count(), 1)
+        self.assertEqual(order.items.first().product_name, 'Smartphone')
+        self.assertEqual(order.total_price, Decimal('1000.00'))
+

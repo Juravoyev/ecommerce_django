@@ -1,0 +1,106 @@
+{% extends 'common/base.html' %}
+
+{% block title %}Buyurtmani rasmiylashtirish — NovaShop{% endblock %}
+
+{% block content %}
+<section class="checkout-section">
+    <div class="container">
+        <span class="eyebrow">Xarid qilish</span>
+        <h1>Buyurtmani rasmiylashtirish</h1>
+        
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="checkout-grid">
+            <div class="checkout-form-container">
+                <h2>Yetkazib berish ma'lumotlari</h2>
+                <form method="post" action="{% url 'checkout' %}" id="checkout-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="cart_data" id="cart-data-input" value="[]">
+                    
+                    <div class="form-group">
+                        <label for="full_name">Ism va Familiya</label>
+                        <input type="text" id="full_name" name="full_name" value="{{ full_name|default:request.user.get_full_name }}" placeholder="Sarvar Safarboyev" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Telefon raqam</label>
+                        <input type="text" id="phone" name="phone" value="{{ phone|default:request.user.phone_number }}" placeholder="+998901234567" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Yetkazib berish manzili *</label>
+                        <textarea id="address" name="address" rows="4" placeholder="Shahar, Tuman, Ko'cha, Uy raqami, xonadon..." required>{{ address }}</textarea>
+                    </div>
+                    <button type="submit" class="button button-primary checkout-submit-btn">Buyurtma berish</button>
+                </form>
+            </div>
+            
+            <div class="checkout-summary">
+                <h2>Sizning buyurtmangiz</h2>
+                <div id="checkout-items-list" class="checkout-items">
+                    <!-- Javascript will populate this list -->
+                    <p class="muted">Yuklanmoqda...</p>
+                </div>
+                <div class="checkout-totals">
+                    <div class="total-row">
+                        <span>Mahsulotlar soni</span>
+                        <span id="checkout-total-count">0 ta</span>
+                    </div>
+                    <div class="total-row grand-total">
+                        <span>Jami</span>
+                        <strong id="checkout-grand-total">0 so'm</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cart = JSON.parse(localStorage.getItem('novashop_cart') || '[]');
+        const itemsList = document.getElementById('checkout-items-list');
+        const totalCountEl = document.getElementById('checkout-total-count');
+        const grandTotalEl = document.getElementById('checkout-grand-total');
+        const cartInput = document.getElementById('cart-data-input');
+        
+        if (cart.length === 0) {
+            itemsList.innerHTML = '<p class="muted">Savatingiz bo\'sh. Iltimos, oldin savatga mahsulot qo\'shing.</p>';
+            document.querySelector('.checkout-submit-btn').disabled = true;
+            return;
+        }
+        
+        // Populate hidden input
+        cartInput.value = JSON.stringify(cart.map(item => ({ id: item.id, qty: item.qty })));
+        
+        // Render summary items
+        let html = '';
+        let totalCount = 0;
+        let grandTotal = 0;
+        
+        cart.forEach(item => {
+            const lineTotal = item.price * item.qty;
+            totalCount += item.qty;
+            grandTotal += lineTotal;
+            
+            html += `
+                <div class="checkout-item">
+                    <div class="item-info">
+                        <strong>${item.name}</strong>
+                        <span>${item.qty} dona × ${Number(item.price).toLocaleString('uz-UZ')} so'm</span>
+                    </div>
+                    <strong class="item-total">${lineTotal.toLocaleString('uz-UZ')} so'm</strong>
+                </div>
+            `;
+        });
+        
+        itemsList.innerHTML = html;
+        totalCountEl.textContent = `${totalCount} ta`;
+        grandTotalEl.textContent = `${grandTotal.toLocaleString('uz-UZ')} so'm`;
+    });
+</script>
+{% endblock %}

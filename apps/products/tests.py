@@ -51,8 +51,9 @@ class ProductModelTests(TestCase):
         response = self.client.get('/api/products/')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.json()), 1)
-        self.assertEqual(response.json()[0]['name'], 'Visible product')
+        results = response.json().get('results', response.json())
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['name'], 'Visible product')
 
     def test_product_api_full_crud(self):
         category = Category.objects.create(name='CRUD category')
@@ -89,3 +90,71 @@ class ProductModelTests(TestCase):
         delete_response = self.client.delete(f'/api/products/{product_id}/')
         self.assertEqual(delete_response.status_code, 204)
         self.assertFalse(Product.objects.filter(id=product_id).exists())
+
+    def test_product_list_api_pagination(self):
+        category = Category.objects.create(name='Paginated Category')
+        for i in range(5):
+            Product.objects.create(
+                category=category,
+                name=f'Product {i}',
+                price=Decimal('10.00'),
+                is_active=True,
+            )
+
+        # CustomLimitOffsetPagination: default_limit=3
+        response = self.client.get('/api/products/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn('count', data)
+        self.assertIn('results', data)
+        self.assertEqual(data['count'], 5)
+        self.assertEqual(len(data['results']), 3)  # default_limit=3
+
+        # Next page with offset
+        response_offset = self.client.get('/api/products/?limit=2&offset=3')
+        self.assertEqual(response_offset.status_code, 200)
+        data_offset = response_offset.json()
+        self.assertEqual(len(data_offset['results']), 2)
+
+    def test_product_list_api_filtering(self):
+        category_a = Category.objects.create(name='Category A')
+        category_b = Category.objects.create(name='Category B')
+        
+        p1 = Product.objects.create(
+            category=category_a,
+            name='Alpha Phone',
+            price=Decimal('150.00'),
+            description='Excellent phone',
+            is_active=True,
+        )
+        p2 = Product.objects.create(
+            category=category_a,
+            name='Beta Laptop',
+            price=Decimal('800.00'),
+            description='Heavy laptop',
+            is_active=True,
+        )
+        p3 = Product.objects.create(
+            category=category_b,
+            name='Gamma Tablet',
+            price=Decimal('350.00'),
+            description='Light tablet',
+            is_active=True,
+        )
+
+        # Filter by category
+        res_cat = self.client.get(f'/api/products/?category={category_a.id}')
+        self.assertEqual(res_cat.status_code, 200)
+        self.assertEqual(res_cat.json()['count'], 2)
+
+        # Filter by name (icontains)
+        res_name = self.client.get('/api/products/?name=alpha')
+        self.assertEqual(res_name.status_code, 200)
+        self.assertEqual(res_name.json()['count'], 1)
+        self.assertEqual(res_name.json()['results'][0]['name'], 'Alpha Phone')
+
+        # Filter by price range
+        res_price = self.client.get('/api/products/?price_min=200&price_max=900')
+        self.assertEqual(res_price.status_code, 200)
+        self.assertEqual(res_price.json()['count'], 2)  # Laptop and Tablet
+

@@ -43,7 +43,7 @@
                             {% endfor %}
                         </div>
                         <div class="order-summary">
-                            <div><span>Qabul qiluvchi</span><strong>{{ order.full_name|default:order.user.get_full_name|default:order.user.username }}</strong></div>
+                            <div><span>Qabul qiluvchi</span><strong>{{ order.full_name|default:order.user.get_full_name|default:order.user.phone_number }}</strong></div>
                             <div><span>Yetkazish manzili</span><strong>{{ order.address|truncatechars:45 }}</strong></div>
                             <div class="grand-total"><span>Jami</span><strong>{{ order.total_price|floatformat:0 }} so'm</strong></div>
                         </div>
@@ -60,4 +60,10 @@
         </div>
     </div>
 </section>
+
+{% if request.GET.checkout_success %}
+<script>
+    localStorage.removeItem('novashop_cart');
+</script>
+{% endif %}
 {% endblock %}
